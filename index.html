@@ -39,6 +39,113 @@
         </div>
 
         <h3>
+<a name="3-nov-2013" class="anchor" href="#3-nov-2013"><span class="octicon octicon-link"></span></a>3 Nov 2013</h3>
+
+<h1>
+<a name="implementing-a-simple-drawing-language-part-1" class="anchor" href="#implementing-a-simple-drawing-language-part-1"><span class="octicon octicon-link"></span></a>Implementing a Simple Drawing Language (Part 1)</h1>
+
+<p>If you've read <a href="http://pragprog.com/the-pragmatic-programmer">The Pragmatic Programmer</a>, you may have stumbled upon a task which asks you to write a parser for a simple drawing language. Its syntax would represent the following thing:</p>
+
+<pre><code>    p 2 // Use the pen with index 2
+    d   // Put the pen down
+    n 2 // Draw 2 cm north
+    e 1 // Draw 1 cm east
+    w 4 // Draw 4 cm west
+    s 1 // Draw 1 cm south
+    u   // Put pen up
+    r   // Run plotter
+</code></pre>
+
+<p>So, let's implement it in C++.</p>
+
+<p>First, we need some basic specifications. </p>
+
+<p>A pen will have an index and a character with which it will draw. A command will consist of a token and an optional parameter. There will be a plotter which will handle all the drawing and command execution. We'll handle errors by simply outputting a string to stdout. There'll be two types of errors - Logic and Syntax. The first will be errors like the user haven't selected a pen but wanting to draw. The latter would be simply errors of invalid tokens. With that said, we can begin reasoning about the design and code of our simple parser. </p>
+
+<p>Let's begin with the parsing. We'll need a way of detecting and interpreting user's input. A simple implementation would be to create an infinite loop in which we'll read input and execute commands according to it.</p>
+
+<pre><code>    while (true)
+    {
+        std::string tokenLine;
+        std::getline(std::cin, tokenLine);
+        char cmd = tokenLine[0];
+        tokenLine.erase(0, 2);
+
+        if (cmd == 'r')
+        {
+            ExecuteCommands();
+            return;
+        }
+
+        int arg;
+        sscanf_s(tokenLine.c_str(), "%i", &amp;arg);
+        commandQueue.push(std::make_pair(cmd, arg));
+    }
+</code></pre>
+
+<p>There are couple of problems with this code. First, it relies on many assumptions. Like, we are sure that the user will insert the tokens as we have specified them - he won't type unnecessary whitespaces. Second, the <code>while (true)</code> condition isn't concidered a good design practice. Why don't we just put that condition in the loop and prevent it from bloating the code logic. With that in mind, here's the refactored code.</p>
+
+<pre><code>    void ParseInput()
+    {
+        std::string tokenLine;
+        std::getline(std::cin, tokenLine);
+                    // Reduce is a utility function which removes the unnecessary whitespaces in a string
+        tokenLine = Reduce(tokenLine); 
+        char cmd = tokenLine[0];
+        tokenLine.erase(0, 2);
+
+        while (cmd != 'r')
+        {
+            int arg;
+            sscanf_s(tokenLine.c_str(), "%i", &amp;arg);
+            commandQueue.push(std::make_pair(cmd, arg));
+
+            std::getline(std::cin, tokenLine);
+            tokenLine = Reduce(tokenLine); 
+            char cmd = tokenLine[0];
+            tokenLine.erase(0, 2);
+        }
+
+        ExecuteCommands();
+    }
+</code></pre>
+
+<p>That's better! But we have some code duplication! We can isolate the getting of the next command in a separate function.</p>
+
+<pre><code>    char GetNextCommand(std::string &amp;tokenLine)
+    {
+        std::getline(std::cin, tokenLine);
+        tokenLine = Reduce(tokenLine);
+        char cmd = tokenLine[0];
+        tokenLine.erase(0, 2);
+
+        return cmd;
+    }
+</code></pre>
+
+<p>We can use that in ParseInput() now:</p>
+
+<pre><code>    void ParseInput()
+    {
+        std::string tokenLine;
+        char cmd = GetNextCommand(tokenLine);
+
+        while (cmd != 'r')
+        {
+            int arg;
+            sscanf_s(tokenLine.c_str(), "%i", &amp;arg);
+            commandQueue.push(std::make_pair(cmd, arg));
+
+            cmd = GetNextCommand(tokenLine);
+        }
+
+        ExecuteCommandQueue();
+    }
+</code></pre>
+
+<p>OK, we're done with the parser. Of course, there is certainly lot to improve about it.</p>
+
+<hr><h3>
 <a name="28-oct-2013" class="anchor" href="#28-oct-2013"><span class="octicon octicon-link"></span></a>28 Oct 2013</h3>
 
 <h1>
