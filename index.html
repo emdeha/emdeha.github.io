@@ -39,6 +39,73 @@
         </div>
 
         <h3>
+<a name="5-nov-2013" class="anchor" href="#5-nov-2013"><span class="octicon octicon-link"></span></a>5 Nov 2013</h3>
+
+<h1>
+<a name="implementing-a-simple-drawing-language-part-2" class="anchor" href="#implementing-a-simple-drawing-language-part-2"><span class="octicon octicon-link"></span></a>Implementing a Simple Drawing Language (Part 2)</h1>
+
+<p>In the first part of these series, I wrote about how the parser is organized. Now, I'm going to write about its commands - how we set them, what they are and how we execute them.</p>
+
+<p>So, one of the task's requirements is that new language syntax should be easy to add. So, if we make a simple array of functions which execute these commands, all it would take to add a new functionality will be to add a function to that array. But a function is associated with a token, so we would make a map of key, value pairs.</p>
+
+<pre><code>// We'll use C++11's &lt;functional&gt; part of the standard library
+std::vector&lt;std::pair&lt;char, std::function&lt;void(int)&gt;&gt;&gt; executionMap;
+</code></pre>
+
+<p>How we add a command? Let's make a function which does this for us:</p>
+
+<pre><code>void AddCommand(char token, std::function&lt;void(int)&gt; executionFunction)
+{
+    executionMap.push_back(std::make_pair(token, executionFunction));
+}
+</code></pre>
+
+<p>And the calling of the command is just as simple. We take a pair of the token and parameters and based on them, we find the appropriate function and call it with the needed parameter.</p>
+
+<pre><code>void CallCommand(std::pair&lt;char, int&gt; command)
+{
+    for (auto execFunc = executionMap.begin(); execFunc != executionMap.end(); ++execFunc)
+    {
+        if (execFunc-&gt;first == command.first)
+        {
+            execFunc-&gt;second(command.second);
+            return;
+        }
+    }
+
+    // what happens if we haven't found the appropriate command?
+}
+</code></pre>
+
+<p>But from where we get those commands? Do you remember the parser? There was a variable called <code>commandQueue</code>. In it we store the input commands. It's a queue of pairs - <code>std::queue&lt;std::pair&lt;char, int&gt;&gt;</code>. After we've reached the 'r' symbol, we call a function which traverses it and executes each command.</p>
+
+<pre><code>void ExecuteCommandQueue()
+{
+    while (!commandQueue.empty())
+    {
+        std::pair&lt;char, int&gt; currentCommand = commandQueue.front();
+        commandQueue.pop();
+        CallCommand(currentCommand);
+    }
+}
+</code></pre>
+
+<p>And here's how we can add each command:</p>
+
+<pre><code>void main()
+{
+    // Thanks to C++11 standard, we can use lambdas
+    AddCommand('p', 
+       [](int param)
+    {
+        std::printf("Selecting pen No: %i\n", param);
+    });
+}
+</code></pre>
+
+<p>In the next post we are going to put it all together!</p>
+
+<hr><h3>
 <a name="3-nov-2013" class="anchor" href="#3-nov-2013"><span class="octicon octicon-link"></span></a>3 Nov 2013</h3>
 
 <h1>
