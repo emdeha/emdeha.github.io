@@ -42,7 +42,7 @@
 <a name="3-nov-2013" class="anchor" href="#3-nov-2013"><span class="octicon octicon-link"></span></a>3 Nov 2013</h3>
 
 <h1>
-<a name="implementing-a-simple-drawing-language-part-1" class="anchor" href="#implementing-a-simple-drawing-language-part-1"><span class="octicon octicon-link"></span></a>Implementing a Simple Drawing Language (Part 1)</h1>
+<a name="implementing-a-simple-drawing-language-part-1" class="anchor" href="#implementing-a-simple-drawing-language-part-1"><span class="octicon octicon-link"></span></a>Implementing a Simple Drawing Language sad (Part 1)</h1>
 
 <p>If you've read <a href="http://pragprog.com/the-pragmatic-programmer">The Pragmatic Programmer</a>, you may have stumbled upon a task which asks you to write a parser for a simple drawing language. Its syntax would represent the following thing:</p>
 
