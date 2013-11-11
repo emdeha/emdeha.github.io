@@ -21,8 +21,6 @@ enum DrawingDirection
 class Plotter 
 {
 private:
-	friend std::function<void(int)>;
-	
 	std::queue<std::pair<char, int>> commandQueue;
 	std::vector<std::pair<char, std::function<void(int)>>> executionMap;
 	std::vector<std::shared_ptr<Pen>> pens;
