@@ -39,6 +39,108 @@
         </div>
 
         <h3>
+<a name="11-nov-2013" class="anchor" href="#11-nov-2013"><span class="octicon octicon-link"></span></a>11 Nov 2013</h3>
+
+<h1>
+<a name="implementing-a-simple-drawing-language-part-3" class="anchor" href="#implementing-a-simple-drawing-language-part-3"><span class="octicon octicon-link"></span></a>Implementing a Simple Drawing Language (Part 3)</h1>
+
+<p>We are now going to put everything together. So basically, we are going to have a Plotter, which will parse and execute the commands and a Pen which is going to be driven by the Plotter.</p>
+
+<p>Ok, lets begin with the Plotter:</p>
+
+<pre><code>class Plotter 
+{
+private:
+    std::queue&lt;std::pair&lt;char, int&gt;&gt; commandQueue;
+    std::vector&lt;std::pair&lt;char, std::function&lt;void(int)&gt;&gt;&gt; executionMap;
+    std::vector&lt;std::shared_ptr&lt;Pen&gt;&gt; pens;
+
+    std::shared_ptr&lt;Pen&gt; selectedPen;
+
+    int dimX;
+    int dimY;
+
+    int currentPosX;
+    int currentPosY;
+
+private:
+    char GetNextCommand(std::string &amp;tokenLine);
+
+    void ExecuteCommandQueue();
+    void CallCommand(std::pair&lt;char, int&gt; command);
+
+public:
+    Plotter() {}
+    Plotter(int newDimX, int newDimY)
+        : dimX(newDimX), dimY(newDimY) {}
+
+    void AddPen(int penType, int penColor, char penSymbol);
+
+    void AddCommand(char token, std::function&lt;void(int)&gt; executionFunction);
+
+    void GetCommands();
+
+public:
+    void SelectPen(int penType);
+    void PutPenDown();
+    void PutPenUp();
+    void SetPenColor(int newColor);
+    void DrawWithPen(DrawingDirection, int length);
+};
+</code></pre>
+
+<p>It will have an <code>executionMap</code> which will map the functions to their command tokens, an <code>commandQueue</code> which will contain the commands in the order they need to be executed and a vector of <code>pens</code>. Also, we'll keep a pointer to the currently selected pen and the current position at which it is being drawn.</p>
+
+<p>To the user, we'll provide methods for manipulating the pens and the plotter. Also, we'll have some methods for getting (parsing) the commands, adding commands, and adding pens.</p>
+
+<p>We'll handle errors by printing simple error messages.</p>
+
+<p>Now, the pen. Its interface is even simpler:</p>
+
+<pre><code>class Pen
+{
+private:
+    int type;
+    int color;
+    char symbol;
+
+    bool isDown;
+
+public:
+    Pen() {}
+    Pen(int newType, int newColor, char newSymbol)
+        : type(newType), color(newColor), symbol(newSymbol), isDown(false) {}
+
+    int GetType()
+    {
+        return type;
+    }
+
+    void PutDown()
+    {
+        isDown = true;
+    }
+    void PutUp()
+    {
+        isDown = false;
+    }
+
+    void SetColor(int newColor)
+    {
+        color = newColor;
+    }
+
+    void DrawLine(int startX, int startY, int endX, int endY);
+};
+</code></pre>
+
+<p>The only interesting method here is <code>DrawLine</code>. Well, maybe you've expected me to show you some interesting usage of graphics and so on, but I'm justing printing out a simple text, saying from where to wehere we are drawing and what symbol we're using.</p>
+
+<p>In our main source file, we are initting the pens and commands, and making an instance of the plotter to start parsing. That's all! </p>
+
+<p>You can find the source on the master branch of this repo :)</p>
+
+<hr><h3>
 <a name="5-nov-2013" class="anchor" href="#5-nov-2013"><span class="octicon octicon-link"></span></a>5 Nov 2013</h3>
 
 <h1>
