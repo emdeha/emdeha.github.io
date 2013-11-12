@@ -44,9 +44,11 @@
 <h1>
 <a name="implementing-a-simple-drawing-language-part-3" class="anchor" href="#implementing-a-simple-drawing-language-part-3"><span class="octicon octicon-link"></span></a>Implementing a Simple Drawing Language (Part 3)</h1>
 
-<p><a href="#implementing-a-simple-drawing-language-part-1">Part 1</a></p>
-
-<p>We are now going to put everything together. So basically, we are going to have a Plotter, which will parse and execute the commands and a Pen which is going to be driven by the Plotter.</p>
+<ul>
+<li><a href="#3-nov-2013">Part 1 - The parser</a></li>
+<li><a href="#5-nov-2013">Part 2 - The commands</a></li>
+<li>Part 3 - Putting it all together (this)</li>
+</ul><p>We are now going to put everything together. So basically, we are going to have a Plotter, which will parse and execute the commands and a Pen which is going to be driven by the Plotter.</p>
 
 <p>Ok, lets begin with the Plotter:</p>
 
@@ -148,7 +150,11 @@ public:
 <h1>
 <a name="implementing-a-simple-drawing-language-part-2" class="anchor" href="#implementing-a-simple-drawing-language-part-2"><span class="octicon octicon-link"></span></a>Implementing a Simple Drawing Language (Part 2)</h1>
 
-<p>In the first part of these series, I wrote about how the parser is organized. Now, I'm going to write about its commands - how we set them, what they are and how we execute them.</p>
+<ul>
+<li><a href="#3-nov-2013">Part 1 - The parser</a></li>
+<li>Part 2 - The commands (this)</li>
+<li><a href="#11-nov-2013">Part 3 - Putting it all together</a></li>
+</ul><p>In the first part of these series, I wrote about how the parser is organized. Now, I'm going to write about its commands - how we set them, what they are and how we execute them.</p>
 
 <p>So, one of the task's requirements is that new language syntax should be easy to add. So, if we make a simple array of functions which execute these commands, all it would take to add a new functionality will be to add a function to that array. But a function is associated with a token, so we would make a map of key, value pairs.</p>
 
@@ -215,7 +221,11 @@ std::vector&lt;std::pair&lt;char, std::function&lt;void(int)&gt;&gt;&gt; executi
 <h1>
 <a name="implementing-a-simple-drawing-language-part-1" class="anchor" href="#implementing-a-simple-drawing-language-part-1"><span class="octicon octicon-link"></span></a>Implementing a Simple Drawing Language (Part 1)</h1>
 
-<p>If you've read <a href="http://pragprog.com/the-pragmatic-programmer">The Pragmatic Programmer</a>, you may have stumbled upon a task which asks you to write a parser for a simple drawing language. Its syntax would represent the following thing:</p>
+<ul>
+<li>Part 1 - The parser (this)</li>
+<li><a href="#5-nov-2013">Part 2 - The commands</a></li>
+<li><a href="#11-nov-2013">Part 3 - Putting it all together</a></li>
+</ul><p>If you've read <a href="http://pragprog.com/the-pragmatic-programmer">The Pragmatic Programmer</a>, you may have stumbled upon a task which asks you to write a parser for a simple drawing language. Its syntax would represent the following thing:</p>
 
 <pre><code>p 2 // Use the pen with index 2
 d   // Put the pen down
