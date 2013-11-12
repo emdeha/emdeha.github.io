@@ -89,7 +89,7 @@ public:
 };
 </code></pre>
 
-<p>It will have an <code>executionMap</code> which will map the functions to their command tokens, an <code>commandQueue</code> which will contain the commands in the order they need to be executed and a vector of <code>pens</code>. Also, we'll keep a pointer to the currently selected pen and the current position at which it is being drawn.</p>
+<p>It will have an <code>executionMap</code> which will map the functions to their command tokens, a <code>commandQueue</code> which will contain the commands in the order they need to be executed and a vector of <code>pens</code>. Also, we'll keep a pointer to the currently selected pen and the current position at which it is being drawn.</p>
 
 <p>To the user, we'll provide methods for manipulating the pens and the plotter. Also, we'll have some methods for getting (parsing) the commands, adding commands, and adding pens.</p>
 
@@ -134,7 +134,7 @@ public:
 };
 </code></pre>
 
-<p>The only interesting method here is <code>DrawLine</code>. Well, maybe you've expected me to show you some interesting usage of graphics and so on, but I'm justing printing out a simple text, saying from where to wehere we are drawing and what symbol we're using.</p>
+<p>The only interesting method here is <code>DrawLine</code>. Well, maybe you've expected me to show you some interesting usage of graphics and so on, but I'm justing printing out a simple text, saying from where to where we are drawing and what symbol we're using.</p>
 
 <p>In our main source file, we are initting the pens and commands, and making an instance of the plotter to start parsing. That's all! </p>
 
@@ -229,9 +229,9 @@ r   // Run plotter
 
 <p>First, we need some basic specifications. </p>
 
-<p>A pen will have an index and a character with which it will draw. A command will consist of a token and an optional parameter. There will be a plotter which will handle all the drawing and command execution. We'll handle errors by simply outputting a string to stdout. There'll be two types of errors - Logic and Syntax. The first will be errors like the user haven't selected a pen but wanting to draw. The latter would be simply errors of invalid tokens. With that said, we can begin reasoning about the design and code of our simple parser. </p>
+<p>A pen will have an index and a character with which it will draw. A command will consist of a token and an optional parameter. There will be a plotter which will handle all the drawing and command execution. We'll handle errors by simply outputting a string to stdout. There'll be two types of errors - Logic and Syntax. The first will be errors like the user haven't selected a pen but wanting to draw. The latter would be simply errors of invalid tokens. With that said, we can begin reasoning about the design and code of our simple interpreter. </p>
 
-<p>Let's begin with the parsing. We'll need a way of detecting and interpreting user's input. A simple implementation would be to create an infinite loop in which we'll read input and execute commands according to it.</p>
+<p>Let's begin with the parsing. We'll need a way of detecting and interpreting the user's input. A simple implementation would be to create an infinite loop in which we'll read input and execute commands according to it.</p>
 
 <pre><code>while (true)
 {
@@ -252,7 +252,7 @@ r   // Run plotter
 }
 </code></pre>
 
-<p>There are couple of problems with this code. First, it relies on many assumptions. Like, we are sure that the user will insert the tokens as we have specified them - he won't type unnecessary whitespaces. Second, the <code>while (true)</code> condition isn't concidered a good design practice. Why don't we just put that condition in the loop and prevent it from bloating the code logic. With that in mind, here's the refactored code.</p>
+<p>There are couple of problems with this code. First, it relies on many assumptions. Like, we are sure that the user will insert the tokens as we have specified them - he won't type unnecessary whitespaces. Second, the <code>while (true)</code> condition isn't considered a good design practice. Why don't we just put that condition in the loop and prevent it from bloating the code logic? With that in mind, here's the refactored code.</p>
 
 <pre><code>void ParseInput()
 {
@@ -312,7 +312,7 @@ r   // Run plotter
 }
 </code></pre>
 
-<p>OK, we're done with the parser. In the next post I'll write about how we'll organize our commands.</p>
+<p>OK, we're done with the parser. In the next post I'm going to write about how we'll organize our commands.</p>
 
 <hr><h3>
 <a name="28-oct-2013" class="anchor" href="#28-oct-2013"><span class="octicon octicon-link"></span></a>28 Oct 2013</h3>
