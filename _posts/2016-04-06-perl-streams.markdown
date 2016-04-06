@@ -424,5 +424,6 @@ check out the [code on github](https://github.com/emdeha/books-and-articles/tree
 and play with it :)
 
 People, part of this:
+
 -- [Camplight](https://camplight.net)
 -- [stelf](https://github.com/stelf)
