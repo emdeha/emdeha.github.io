@@ -12,6 +12,16 @@
   <link rel="stylesheet" href="/css/main.css">
   <link rel="canonical" href="/">
   <link rel="alternate" type="application/rss+xml" title="Tsvetan's Blog" href="/feed.xml">
+
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+        m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+            })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-75825716-1', 'auto');
+      ga('send', 'pageview');
+  </script>
 </head>
 
 
@@ -60,11 +70,844 @@
     
       <li>
         <h2>
+          Manipulating streams with Perl
+        </h2>
+
+        <p>
+          <p>Streams are some thingies which are quite useful when one wants to get data on<br />
+demand.  Usually we don’t know when they will end, so we just drain them byte<br />
+by byte until we take all we need.  We could boost them though by providing <br />
+ways of making streams out of random objects, merging and transforming them,<br />
+and not let them drain.</p>
+
+<p>In this post I’m going to show you some means to create infinite, immutable<br />
+streams using Perl.</p>
+
+<p>Given the above requirements, our streams should:<br />
+1. Provide a simple interface in order to create a stream from any type of object<br />
+2. Be infinite<br />
+3. Be immutable</p>
+
+<p>Let’s begin with the interface.  We need two functions – one to create a <br />
+stream from an object and another to create an object from a stream.  For the<br />
+sake of simplicity, our object will be a list.  <code class="highlighter-rouge">make_stream</code> should get a<br />
+list and provide a constructor which will let us explore the generated stream.<br />
+This constructor would be a function reference which, upon evaluation, would<br />
+return a <code class="highlighter-rouge">tuple</code> containing the first element (the head) and the rest of the <br />
+stream (the tail).</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">sub </span><span class="nf">make_stream</span> <span class="p">{</span>
+  <span class="k">my</span> <span class="p">(</span><span class="nv">$head</span><span class="p">,</span> <span class="nv">@rest</span><span class="p">)</span> <span class="o">=</span> <span class="nv">@_</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="k">sub </span><span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nv">$head</span><span class="p">,</span> <span class="nv">make_stream</span><span class="p">(</span><span class="nv">@rest</span><span class="p">));</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">my</span> <span class="nv">$numbers</span> <span class="o">=</span> <span class="nv">make_stream</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
+
+<span class="c1"># Exhaust our stream</span>
+<span class="k">my</span> <span class="p">(</span><span class="nv">$first</span><span class="p">,</span> <span class="nv">$numbers</span><span class="p">)</span> <span class="o">=</span> <span class="nv">$numbers</span><span class="o">-&gt;</span><span class="p">();</span>
+<span class="k">while</span> <span class="p">(</span><span class="nb">defined</span> <span class="nv">$first</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nv">say</span> <span class="nv">$first</span><span class="p">;</span>
+  <span class="p">(</span><span class="nv">$first</span><span class="p">,</span> <span class="nv">$numbers</span><span class="p">)</span> <span class="o">=</span> <span class="nv">$numbers</span><span class="o">-&gt;</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>In order to provide a robust handling of streams, we should prevent the user<br />
+from accessing the constructor directly.  A stream should be a something which<br />
+could only be manipulated via a set of library functions.  Thus, our next step<br />
+is to provide a stream unwrapper – a function dual to <code class="highlighter-rouge">make_stream</code>.  It <br />
+should deconstruct the stream into a head and a tail and return a tuple of the<br />
+head and the deconstructed tail.  It should stop the process when the head is<br />
+undefined.  Note that we never manipulate the passed stream – immutability is<br />
+one of the properties we need with streams.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">sub </span><span class="nf">unmake_stream</span> <span class="p">{</span>
+  <span class="k">my</span> <span class="nv">$stream</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
+  <span class="k">my</span> <span class="p">(</span><span class="nv">$head</span><span class="p">,</span> <span class="nv">$rest</span><span class="p">)</span> <span class="o">=</span> <span class="nv">$stream</span><span class="o">-&gt;</span><span class="p">();</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nb">defined</span> <span class="nv">$head</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="p">(</span><span class="nv">$head</span><span class="p">,</span> <span class="nv">unmake_stream</span><span class="p">(</span><span class="nv">$rest</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="nv">say</span> <span class="nv">unmake_stream</span><span class="p">(</span><span class="nv">$numbers</span><span class="p">);</span>
+</code></pre>
+</div>
+
+<p>Now, we have the means of creating and consuming streams.  The next function <br />
+which we’ll need is <code class="highlighter-rouge">cons</code>.  This function would prepend an element to the <br />
+stream.  Our stream constructor is a function reference which returns a tuple<br />
+of the stream’s head and the rest of the stream.  When prepending an element to<br />
+the stream, its head becomes the new element and its tail becomes the <br />
+constructor of the old stream.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">sub </span><span class="nf">cons</span> <span class="p">{</span>
+  <span class="k">my</span> <span class="p">(</span><span class="nv">$elem</span><span class="p">,</span> <span class="nv">$stream</span><span class="p">)</span> <span class="o">=</span> <span class="nv">@_</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="k">sub </span><span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nv">$elem</span><span class="p">,</span> <span class="nv">$stream</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1"># Prepend one element</span>
+<span class="nv">$numbers</span> <span class="o">=</span> <span class="nv">cons</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nv">$numbers</span><span class="p">);</span>
+
+<span class="c1"># Prepend several elements</span>
+<span class="c1"># It's easy to string functions which operate on streams</span>
+<span class="nv">$numbers</span> <span class="o">=</span> <span class="nv">cons</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">,</span> <span class="nv">cons</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="nv">cons</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nv">$numbers</span><span class="p">)));</span>
+</code></pre>
+</div>
+
+<p>Okay, so now we have finite streams in Perl.  But how do we handle infinity?<br />
+Basically, an infinite stream begins with some initial value and builds upon<br />
+it.  The natural numbers are a good example: they begin from 1 and each number<br />
+other than 1 is the previous number plus 1.  So we should be able to write code<br />
+like this:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="c1"># $_[0] is the previous stream element</span>
+<span class="k">my</span> <span class="nv">$nat_nums</span> <span class="o">=</span> <span class="nv">make_stream</span><span class="p">(</span>
+  <span class="nv">from</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span> 
+  <span class="nv">by</span> <span class="o">=&gt;</span> <span class="k">sub </span><span class="p">{</span> <span class="nv">$_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">}</span>
+<span class="p">);</span>
+</code></pre>
+</div>
+
+<p>Now, instead of getting the rest of the stream from the provided list, when<br />
+provided with a <code class="highlighter-rouge">by</code>, <code class="highlighter-rouge">make_stream</code> should generate it using this function on<br />
+the stream’s head.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">sub </span><span class="nf">make_stream</span> <span class="p">{</span>
+  <span class="k">my</span> <span class="nv">%maker</span> <span class="o">=</span> <span class="nv">@_</span><span class="p">;</span>
+
+  <span class="k">my</span> <span class="p">(</span><span class="nv">$head</span><span class="p">,</span> <span class="nv">@rest</span><span class="p">)</span> <span class="o">=</span> <span class="nv">@</span><span class="p">{</span><span class="nv">$maker</span><span class="p">{</span><span class="nv">from</span><span class="p">}};</span>
+  <span class="k">my</span> <span class="nv">$gen</span> <span class="o">=</span> <span class="nv">$maker</span><span class="p">{</span><span class="nv">by</span><span class="p">};</span>
+
+  <span class="k">return</span> <span class="k">sub </span><span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nb">defined</span> <span class="nv">$gen</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="p">(</span><span class="nv">$head</span><span class="p">,</span> <span class="nv">make_stream</span><span class="p">(</span><span class="nv">from</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="nv">@rest</span><span class="p">]));</span>
+    <span class="p">}</span>
+
+    <span class="c1"># Here's the real deal \m/</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nv">$head</span><span class="p">,</span> <span class="nv">make_stream</span><span class="p">(</span><span class="nv">from</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="nv">$gen</span><span class="o">-&gt;</span><span class="p">(</span><span class="nv">$head</span><span class="p">)],</span> <span class="nv">by</span> <span class="o">=&gt;</span> <span class="nv">$gen</span><span class="p">));</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1"># What happens here?</span>
+<span class="nv">say</span> <span class="nv">unmake_stream</span><span class="p">(</span><span class="nv">$nat_nums</span><span class="p">);</span>
+</code></pre>
+</div>
+
+<p>When provided with an infinite stream, <code class="highlighter-rouge">unmake_stream</code> would try to evaluate it<br />
+until it reaches the end of it.  The problem with infinities is, well…, they<br />
+are infinite.  So the evaluation of <code class="highlighter-rouge">unmake_stream</code> over an infinite list would<br />
+take quite some time (until it exhausts perl’s stack space).</p>
+
+<p>Therefore, now we need ways to <code class="highlighter-rouge">take</code> only a number of elements from an<br />
+infinite stream.  <code class="highlighter-rouge">take</code> is a function which takes <code class="highlighter-rouge">cnt</code> number of elements and<br />
+returns a new stream containing only <code class="highlighter-rouge">cnt</code> elements which is guaranteed to be<br />
+finite.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">sub </span><span class="nf">take</span> <span class="p">{</span>
+  <span class="k">my</span> <span class="p">(</span><span class="nv">$cnt</span><span class="p">,</span> <span class="nv">$stream</span><span class="p">)</span> <span class="o">=</span> <span class="nv">@_</span><span class="p">;</span>
+  <span class="k">my</span> <span class="p">(</span><span class="nv">$head</span><span class="p">,</span> <span class="nv">$rest</span><span class="p">)</span> <span class="o">=</span> <span class="nv">$stream</span><span class="o">-&gt;</span><span class="p">();</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="nv">$cnt</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="o">||</span> <span class="o">!</span><span class="nb">defined</span> <span class="nv">$head</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nv">make_stream</span><span class="p">(</span><span class="nv">from</span> <span class="o">=&gt;</span> <span class="o">[]</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nv">cons</span><span class="p">(</span><span class="nv">$head</span><span class="p">,</span> <span class="nv">take</span><span class="p">(</span><span class="nv">$cnt</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nv">$rest</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="nv">say</span> <span class="nv">unmake_stream</span><span class="p">(</span><span class="nv">take</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="nv">$nat_nums</span><span class="p">))</span> <span class="c1"># 0, 1, 2, 3, 4, 5</span>
+</code></pre>
+</div>
+
+<p>Often we’d love to concatenate streams.  Let’s make a function <code class="highlighter-rouge">concat</code> which<br />
+would take two streams and return a stream where the first stream is prepended<br />
+to the second.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">sub </span><span class="nf">concat</span> <span class="p">{</span>
+  <span class="k">my</span> <span class="p">(</span><span class="nv">$first</span><span class="p">,</span> <span class="nv">$second</span><span class="p">)</span> <span class="o">=</span> <span class="nv">@_</span><span class="p">;</span>
+  <span class="k">my</span> <span class="p">(</span><span class="nv">$first_head</span><span class="p">,</span> <span class="nv">$first_rest</span><span class="p">)</span> <span class="o">=</span> <span class="nv">$first</span><span class="o">-&gt;</span><span class="p">();</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nb">defined</span><span class="p">(</span><span class="nv">$first_head</span><span class="p">))</span> <span class="p">{</span>
+    <span class="c1"># We no longer have what to concatenate with</span>
+    <span class="k">return</span> <span class="nv">$second</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nv">cons</span><span class="p">(</span><span class="nv">$first_head</span><span class="p">,</span> <span class="nv">concat</span><span class="p">(</span><span class="nv">$first_rest</span><span class="p">,</span> <span class="nv">$second</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>Now, stop for a while, examine this piece of beauty and try to figure out its<br />
+main flaw.</p>
+
+<p>…</p>
+
+<p>Flaws are best left unattended until they shine in immaculate destruction.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">my</span> <span class="nv">$three</span> <span class="o">=</span> <span class="nv">make_stream</span><span class="p">(</span><span class="nv">from</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]);</span>
+<span class="c1"># Concat two finite streams</span>
+<span class="nv">say</span> <span class="nv">unmake_stream</span><span class="p">(</span><span class="nv">concat</span><span class="p">(</span>
+      <span class="nv">$three</span><span class="p">,</span>
+      <span class="nv">make_stream</span><span class="p">(</span><span class="nv">from</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">])));</span> <span class="c1"># 1, 2, 3, 4, 5, 6</span>
+
+<span class="c1"># Concat a finite stream with an infinite one</span>
+<span class="nv">say</span> <span class="nv">unmake_stream</span><span class="p">(</span><span class="nv">take</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="nv">concat</span><span class="p">(</span><span class="nv">$three</span><span class="p">,</span> <span class="nv">$nat_nums</span><span class="p">)))</span> <span class="c1"># 1, 2, 3, 1, 2</span>
+
+<span class="c1"># Could a destruction be more pure than a stack overflow?</span>
+<span class="c1"># Concat an infinite stream to another stream</span>
+<span class="nv">say</span> <span class="nv">unmake_stream</span><span class="p">(</span><span class="nv">take</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="nv">concat</span><span class="p">(</span><span class="nv">$nat_nums</span><span class="p">,</span> <span class="nv">$three</span><span class="p">)));</span>
+</code></pre>
+</div>
+
+<p>The problem with the current implementation of <code class="highlighter-rouge">concat</code> is that it removes <br />
+lazyness.  Despite the popular opinion, here lazyness is something we strive to<br />
+achieve.  Everything which prevents it, prevents us from doing work with<br />
+potential infinities.  How do we tackle this problem?  Remember that a stream<br />
+is just a constructor returning something and the rest of it in a state <br />
+awaiting evaluation.  <code class="highlighter-rouge">concat</code> just forgot the second part of the definition<br />
+of what streams are.  How we create something that awaits evaluation?  We put<br />
+it in a function which gets evaluated upon call.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">sub </span><span class="nf">concat</span> <span class="p">{</span>
+  <span class="k">my</span> <span class="p">(</span><span class="nv">$first</span><span class="p">,</span> <span class="nv">$second</span><span class="p">)</span> <span class="o">=</span> <span class="nv">@_</span><span class="p">;</span>
+  <span class="k">my</span> <span class="p">(</span><span class="nv">$first_head</span><span class="p">,</span> <span class="nv">$first_rest</span><span class="p">)</span> <span class="o">=</span> <span class="nv">$first</span><span class="o">-&gt;</span><span class="p">();</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nb">defined</span><span class="p">(</span><span class="nv">$first_head</span><span class="p">))</span> <span class="p">{</span>
+    <span class="c1"># We no longer have what to concatenate with</span>
+    <span class="k">return</span> <span class="nv">$second</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nv">cons</span><span class="p">(</span><span class="nv">$first_head</span><span class="p">,</span> <span class="k">sub </span><span class="p">{</span> <span class="nv">concat</span><span class="p">(</span><span class="nv">$first_rest</span><span class="p">,</span> <span class="nv">$second</span><span class="p">)</span> <span class="p">});</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>But using <code class="highlighter-rouge">cons</code> in this way, means that, in a way, we’ve created a stream of a<br />
+stream.  And in the case when we’ve concatenated two streams, we’ll have to<br />
+work with a stream of a stream instead.  Each time we try to use the stream’s<br />
+elements, we’d have to remove one level of, let’s say, streamity in order to <br />
+reach the underlying stream.  This could be done, in the expense of making the<br />
+code harder to maintain:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">sub </span><span class="nf">unmake_stream</span> <span class="p">{</span>
+  <span class="k">my</span> <span class="nv">$stream</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
+  <span class="k">my</span> <span class="p">(</span><span class="nv">$head</span><span class="p">,</span> <span class="nv">$rest</span><span class="p">)</span> <span class="o">=</span> <span class="nv">$stream</span><span class="o">-&gt;</span><span class="p">();</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nb">defined</span> <span class="nv">$head</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">();</span>
+  <span class="p">}</span>
+
+  <span class="c1"># Check whether we're working with a stream of a stream</span>
+  <span class="k">my</span> <span class="p">(</span><span class="nv">$unstreamed</span><span class="p">,</span> <span class="nb">undef</span><span class="p">)</span> <span class="o">=</span> <span class="nv">$rest</span><span class="o">-&gt;</span><span class="p">();</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nb">ref</span> <span class="nv">$unstreamed</span> <span class="ow">eq</span> <span class="s">'CODE'</span><span class="p">)</span> <span class="p">{</span> <span class="c1"># A stream is just a CODE ref</span>
+    <span class="c1"># Remove a level of streamity</span>
+    <span class="nv">$rest</span> <span class="o">=</span> <span class="nv">$unstreamed</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="p">(</span><span class="nv">$head</span><span class="p">,</span> <span class="nv">unmake_stream</span><span class="p">(</span><span class="nv">$rest</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>And this kind of code should be put whenever we create a function which has<br />
+the potential of working on concatenated streams.</p>
+
+<p>But why use <code class="highlighter-rouge">cons</code> in the first place?  To reuse code.  Often, however, there <br />
+are times when code reuse is actually a bad thing.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">sub </span><span class="nf">concat</span> <span class="p">{</span>
+  <span class="k">my</span> <span class="p">(</span><span class="nv">$first</span><span class="p">,</span> <span class="nv">$second</span><span class="p">)</span> <span class="o">=</span> <span class="nv">@_</span><span class="p">;</span>
+  <span class="k">my</span> <span class="p">(</span><span class="nv">$first_head</span><span class="p">,</span> <span class="nv">$first_rest</span><span class="p">)</span> <span class="o">=</span> <span class="nv">$first</span><span class="o">-&gt;</span><span class="p">();</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nb">defined</span><span class="p">(</span><span class="nv">$first_head</span><span class="p">))</span> <span class="p">{</span>
+    <span class="c1"># We no longer have what to concatenate with</span>
+    <span class="k">return</span> <span class="nv">$second</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="k">sub </span><span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nv">$first_head</span><span class="p">,</span> <span class="nv">concat</span><span class="p">(</span><span class="nv">$first_rest</span><span class="p">,</span> <span class="nv">$second</span><span class="p">));</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+
+<p>Now <code class="highlighter-rouge">concat</code> itself constructs the stream resulting from the concatenation of<br />
+the two streams.  We no longer need to do unmaintainability-foo in order to <br />
+implement other valuable stream functions.  As a rule, each function which <br />
+generates an infinite chain of recursive calls, should wrap them in a function<br />
+reference.</p>
+
+<p>Having <code class="highlighter-rouge">take</code>, we could implement its opposite – <code class="highlighter-rouge">drop</code>.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">sub </span><span class="nf">drop</span> <span class="p">{</span>
+  <span class="k">my</span> <span class="p">(</span><span class="nv">$n</span><span class="p">,</span> <span class="nv">$stream</span><span class="p">)</span> <span class="o">=</span> <span class="nv">@_</span><span class="p">;</span>
+  <span class="k">my</span> <span class="p">(</span><span class="nv">$head</span><span class="p">,</span> <span class="nv">$rest</span><span class="p">)</span> <span class="o">=</span> <span class="nv">$stream</span><span class="o">-&gt;</span><span class="p">();</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nb">defined</span> <span class="nv">$head</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nv">make_stram</span><span class="p">(</span><span class="nv">from</span> <span class="o">=&gt;</span> <span class="o">[]</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="nv">$n</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nv">$rest</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nv">drop</span><span class="p">(</span><span class="nv">$n</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="nv">$rest</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nv">say</span> <span class="nv">unmake_stream</span><span class="p">(</span><span class="nv">take</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="nv">drop</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="nv">$nat_nums</span><span class="p">)));</span> <span class="c1"># 10, 11, ..., 19</span>
+</code></pre>
+</div>
+
+<p>How do we remove an element at an index <code class="highlighter-rouge">i</code>?  Well, if we <code class="highlighter-rouge">take</code> the first <code class="highlighter-rouge">i</code><br />
+elements and concatenate them to the elements after <code class="highlighter-rouge">i+1</code>, the resulting stream<br />
+would have everything but its <code class="highlighter-rouge">i-th</code> element.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">sub </span><span class="nf">dropAt</span> <span class="p">{</span>
+  <span class="k">my</span> <span class="p">(</span><span class="nv">$i</span><span class="p">,</span> <span class="nv">$stream</span><span class="p">)</span> <span class="o">=</span> <span class="nv">@_</span><span class="p">;</span>
+
+  <span class="k">return</span> <span class="nv">concat</span><span class="p">(</span><span class="nv">take</span><span class="p">(</span><span class="nv">$i</span><span class="p">,</span> <span class="nv">$stream</span><span class="p">),</span> <span class="nv">drop</span><span class="p">(</span><span class="nv">$i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nv">$stream</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="nv">say</span> <span class="nv">unmake_stream</span><span class="p">(</span><span class="nv">take</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="nv">dropAt</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="nv">$nat_nums</span><span class="p">)));</span> <span class="c1"># 1, 2, 3, 4, 6, 7, 8, 9, 10</span>
+</code></pre>
+</div>
+
+<p>Let’s make some other useful functions on streams.  <code class="highlighter-rouge">head</code> should return the<br />
+first element in a stream and <code class="highlighter-rouge">tail</code> should return a stream containing <br />
+everything but the stream’s head.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">sub </span><span class="nf">head</span> <span class="p">{</span>
+  <span class="k">my</span> <span class="nv">$stream</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
+  <span class="k">my</span> <span class="p">(</span><span class="nv">$head</span><span class="p">,</span> <span class="nb">undef</span><span class="p">)</span> <span class="o">=</span> <span class="nv">$stream</span><span class="o">-&gt;</span><span class="p">();</span>
+
+  <span class="k">return</span> <span class="nv">$head</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="k">sub </span><span class="nf">tail</span> <span class="p">{</span>
+  <span class="k">my</span> <span class="nv">$stream</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
+  <span class="k">my</span> <span class="p">(</span><span class="nb">undef</span><span class="p">,</span> <span class="nv">$rest</span><span class="p">)</span> <span class="o">=</span> <span class="nv">$stream</span><span class="o">-&gt;</span><span class="p">();</span>
+
+  <span class="k">return</span> <span class="nv">$rest</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="nv">say</span> <span class="nv">head</span><span class="p">(</span><span class="nv">$nat_nums</span><span class="p">);</span> <span class="c1"># 1</span>
+
+<span class="nv">say</span> <span class="nv">unmake_stream</span><span class="p">(</span><span class="nv">take</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="nv">tail</span><span class="p">(</span><span class="nv">$nat_nums</span><span class="p">)));</span> <span class="c1"># 2, 3, 4</span>
+</code></pre>
+</div>
+
+<p>How do we get the length of a <em>finite</em> stream?  The length of a stream is just<br />
+1 + the length of the rest of the stream.  The subtle problem with this<br />
+function is that it is useful only with finite streams.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">sub </span><span class="nf">slength</span> <span class="p">{</span>
+  <span class="k">my</span> <span class="nv">$stream</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
+  <span class="k">my</span> <span class="p">(</span><span class="nv">$head</span><span class="p">,</span> <span class="nv">$rest</span><span class="p">)</span> <span class="o">=</span> <span class="nv">$stream</span><span class="o">-&gt;</span><span class="p">();</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nb">defined</span> <span class="nv">$head</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="mi">1</span> <span class="o">+</span> <span class="nv">slength</span><span class="p">(</span><span class="nv">$rest</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="nv">say</span> <span class="nv">slength</span><span class="p">(</span><span class="nv">make_stream</span><span class="p">(</span><span class="nv">from</span> <span class="o">=&gt;</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]));</span> <span class="c1"># 4</span>
+</code></pre>
+</div>
+
+<p>We created all the means of querying elements from streams, adding elements to<br />
+streams and dropping elements from streams.  How can we modify elements of a<br />
+stream?  Let’s create the function <code class="highlighter-rouge">smap</code> which would go over a stream and<br />
+apply a function over each element of the stream.  This function should<br />
+preserve lazyness :)</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">sub </span><span class="nf">smap</span> <span class="p">{</span>
+  <span class="k">my</span> <span class="p">(</span><span class="nv">$f</span><span class="p">,</span> <span class="nv">$stream</span><span class="p">)</span> <span class="o">=</span> <span class="nv">@_</span><span class="p">;</span>
+  <span class="k">my</span> <span class="p">(</span><span class="nv">$head</span><span class="p">,</span> <span class="nv">$rest</span><span class="p">)</span> <span class="o">=</span> <span class="nv">$stream</span><span class="o">-&gt;</span><span class="p">();</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nb">defined</span> <span class="nv">$head</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nv">make_stream</span><span class="p">(</span><span class="nv">from</span> <span class="o">=&gt;</span> <span class="o">[]</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="k">sub </span><span class="p">{</span> <span class="c1"># Be lazy!</span>
+    <span class="c1"># Return a tuple of the modified element and $f applied to the rest of</span>
+    <span class="c1"># the stream </span>
+    <span class="k">return</span> <span class="p">(</span><span class="nv">$f</span><span class="o">-&gt;</span><span class="p">(</span><span class="nv">$head</span><span class="p">),</span> <span class="nv">smap</span><span class="p">(</span><span class="nv">$f</span><span class="p">,</span> <span class="nv">$rest</span><span class="p">));</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1"># Some voodoo time (and LISP-ness)</span>
+<span class="nv">say</span> <span class="nv">unmake_stream</span><span class="p">(</span>
+      <span class="nv">take</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="c1"># Take only 10 of them</span>
+        <span class="nv">smap</span><span class="p">(</span>
+          <span class="k">sub </span><span class="p">{</span> <span class="nv">$_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span> <span class="p">},</span> <span class="c1"># Create ALL even numbers</span>
+          <span class="nv">$nat_nums</span>
+        <span class="p">)));</span>
+</code></pre>
+</div>
+
+<p>What’s a map without <code class="highlighter-rouge">filter</code>?  The function <code class="highlighter-rouge">filter</code> should take a predicate<br />
+and a stream and return a stream containing only these elements satisfying the<br />
+predicate.  It should also preserve lazyness.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">sub </span><span class="nf">filter</span> <span class="p">{</span>
+  <span class="k">my</span> <span class="p">(</span><span class="nv">$pred</span><span class="p">,</span> <span class="nv">$stream</span><span class="p">)</span> <span class="o">=</span> <span class="nv">@_</span><span class="p">;</span>
+  <span class="k">my</span> <span class="p">(</span><span class="nv">$head</span><span class="p">,</span> <span class="nv">$rest</span><span class="p">)</span> <span class="o">=</span> <span class="nv">$stream</span><span class="o">-&gt;</span><span class="p">();</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nb">defined</span> <span class="nv">$head</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nv">make_stream</span><span class="p">(</span><span class="nv">from</span> <span class="o">=&gt;</span> <span class="o">[]</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="nv">$pred</span><span class="o">-&gt;</span><span class="p">(</span><span class="nv">$head</span><span class="p">))</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="k">sub </span><span class="p">{</span>
+      <span class="k">return</span> <span class="p">(</span><span class="nv">$head</span><span class="p">,</span> <span class="nv">filter</span><span class="p">(</span><span class="nv">$pred</span><span class="p">,</span> <span class="nv">$rest</span><span class="p">));</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+
+  <span class="k">return</span> <span class="nv">filter</span><span class="p">(</span><span class="nv">$pred</span><span class="p">,</span> <span class="nv">$rest</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="c1"># Take the next 10 even numbers</span>
+<span class="nv">say</span> <span class="nv">unmake_stream</span><span class="p">(</span>
+      <span class="nv">take</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span>
+        <span class="nv">drop</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span>
+          <span class="nv">filter</span><span class="p">(</span>
+            <span class="k">sub </span><span class="p">{</span> <span class="nv">$_</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="nv">%</span> <span class="nv">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">},</span>
+            <span class="nv">$nat_nums</span>
+          <span class="p">))));</span>
+</code></pre>
+</div>
+
+<p>These functions give us the possibility to manipulate various kinds of streams<br />
+on objects which only provide a way to be streamed via <code class="highlighter-rouge">by =&gt; sub { ... }</code>, <br />
+which generates the stream’s next element.  In another post I’ll show you how<br />
+to use this simple library to manipulate streamed data.  Meanwhile, you can <br />
+check out the <a href="https://github.com/emdeha/books-and-articles/tree/master/tech-articles/unicorn-streams/perl">code on github</a><br />
+and play with it :)</p>
+
+<p><a href="https://camplight.net">Camplight</a> made this possible.</p>
+
+        </p>
+
+        <span class="post-meta">Apr 6, 2016</span>
+      </li>
+    
+      <li>
+        <h2>
+          Going beyond interviews
+        </h2>
+
+        <p>
+          <p>Recently, I’ve been doing some bizdev with <a href="http://camplight.net">Camplight</a>.<br />
+This undertaking brought some valuable lessons and insights which I’m going to<br />
+share.</p>
+
+<p>I remember when I was preparing for my first interview.  It was a special <br />
+occasion.  It was the first time I had the opportunity to sell my skills and<br />
+expertise to a company.  I didn’t see it that way then because I was too<br />
+focused on the objective of finding a place where I can work.  Since then I<br />
+learned and understood a lot.  Actually, interviews are happening every day to<br />
+each one of us because each day we are trying to sell ourselves to the people<br />
+around us.  This selling depends on context – sometimes it’s so indirect that<br />
+the person across you can’t understand that you’re actually selling yourself<br />
+to them.  But if you achieve your final goal to start building a relationship<br />
+with them, you’ve actually made a successful sale.</p>
+
+<p>Writing cold emails to business prospects works the same way.  You approach<br />
+someone you really want to work with, say how you can help them, say why you<br />
+wanna help them, and offer a call-to-action.  You start going to interviews <br />
+for a whole organization.  You don’t just try finding your dream job.  You try<br />
+to find the dream contract for the organization you care about.</p>
+
+<p>I find quite a beauty in this.  In a way, it’s a process which makes job <br />
+interviews look insignificant.</p>
+
+        </p>
+
+        <span class="post-meta">Mar 23, 2016</span>
+      </li>
+    
+      <li>
+        <h2>
+          When everything is aligned
+        </h2>
+
+        <p>
+          <p>When everything is aligned with your current purpose, you have a natural will<br />
+to act and succeed in giving attention to all you care about.  You call your<br />
+parents regularly, make people feel good, do Quality work on the projects you<br />
+have commited to.</p>
+
+<p>A simple, beautiful form of human behavior.</p>
+
+        </p>
+
+        <span class="post-meta">Mar 10, 2016</span>
+      </li>
+    
+      <li>
+        <h2>
+          Conspiracies
+        </h2>
+
+        <p>
+          <p>Your conspiracy theories are bullshit.  Capitalism is a force driven by money<br />
+and the means to obtain money are by selling goods to customers.  Someone needs<br />
+their problem solved and a company provides the solution.  Companies need<br />
+marketing, however, and data.  Data is obtained by observing what your users do.<br />
+After you get it, you begin to use it in order to boost your sales by offering<br />
+your customers what they really need.  You get money and power, the others get<br />
+what they need, not excluding money and power.  That’s the current state of<br />
+affairs in the world.  It ain’t conspiracy.  It’s a set of rules which you<br />
+should follow until you provide a better way of giving people freedom and<br />
+means to accomplish their goals.</p>
+
+        </p>
+
+        <span class="post-meta">Mar 6, 2016</span>
+      </li>
+    
+      <li>
+        <h2>
+          Momentum
+        </h2>
+
+        <p>
+          <p>Momentum can be hard to acquire.  Once you have it, however, you can keep it<br />
+and tame it while generating as much value as possible.  Care must be taken,<br />
+though.  It’s easy to lose momentum and get back to the spiral of grind.</p>
+
+<p>Momentum is built by succeeding.  Your daily tasks should be right on your <br />
+edge – neither too hard, nor too easy.  Each day you should be able to <br />
+quantify your actions and see how they have driven you near achieving your<br />
+desired destination.  This skill needs time and a bit of luck.  Perservere and<br />
+you’ll learn how to build your momentum when you want and need it.</p>
+
+        </p>
+
+        <span class="post-meta">Mar 4, 2016</span>
+      </li>
+    
+      <li>
+        <h2>
+          Measures of success
+        </h2>
+
+        <p>
+          <p>Your measure of success is reality.  Feelings and emotions contribute to your<br />
+well-being and may make you more successful.  Feelings and emotions are not<br />
+objective, however.  You can’t take imaginary and illusionary events and<br />
+deduce that you are successful because you are thinking of them.  You can only<br />
+be kind of sure you are achieving something if enough high-achieving peers of<br />
+yours are also acknowledging your effort and skills.  Given the fact that even<br />
+this measure of success is not reliable, anything less than it is subject to<br />
+fallacy.</p>
+
+        </p>
+
+        <span class="post-meta">Feb 29, 2016</span>
+      </li>
+    
+      <li>
+        <h2>
+          Impaired communication
+        </h2>
+
+        <p>
+          <p>Communication is highly affected by our body and intonation.  One’s actions can <br />
+easily show what words really mean, to the other person.  With some effort one<br />
+could train themselves to accompany their words with the right and unambiguous<br />
+body language.  In this way a person would rarely be misunderstood and a<br />
+person could really show their intentions and purpose.</p>
+
+<p>A problem arises when one communicates over distance via the Internet, mail or<br />
+telephone.  In this situation a person lacks the ability to show and to react.<br />
+A person must learn to communicate only with words and act only through them.<br />
+This skill is much harder to obtain.</p>
+
+<p>How can one obtain this skill?  One possible solution is to be expressive, to<br />
+use many words or better – to use much stronger language and topics of<br />
+communcation.  Another way to solve this problem is to avoid it altogether.<br />
+Use means of distant conversation only to arange face-to-face communication.<br />
+No matter which solution you choose, you must still practice the art of <br />
+persuation and clear thought expression.  The more failures you learn from,<br />
+the better you’d become at properly helping the other person understand what<br />
+you really mean.</p>
+
+        </p>
+
+        <span class="post-meta">Feb 26, 2016</span>
+      </li>
+    
+      <li>
+        <h2>
+          Purpose-driven habit making
+        </h2>
+
+        <p>
+          <p>When one is deeply secure and determined in their own purpose they cannot let<br />
+bad habits diverge them from the chosen path.  Habits are best made while being<br />
+mindful of your own deep truth.  Because if your truth is bigger than who you<br />
+are, you’ll do what it takes to follow it.  Every other way of making and <br />
+breaking habits is prone to failure.  And trying to use every other way of<br />
+making and breaking habits is a sign that you are not following your life’s<br />
+destination.</p>
+
+        </p>
+
+        <span class="post-meta">Feb 21, 2016</span>
+      </li>
+    
+      <li>
+        <h2>
+          Curiousity
+        </h2>
+
+        <p>
+          <p>Let all of your actions be guided by curiousity.  If you feel boredom, stop and<br />
+observe what happens in your mind and emotions.  If you feel overwhelmed, stop<br />
+and observe what triggers your anxiety.  If you are scared, notice what makes<br />
+you not want to go forward.  Understand and act.</p>
+
+<p>Don’t limit curiousity to just fighting “bad” feelings.  Apply curiousity to<br />
+your passion and your relationships.  Have you ever been interested about a<br />
+person?  Have you ever began a conversation with the phrase “What are the three<br />
+things you value most in life?”  Have you ever resisted the urge to tell<br />
+someone how awesome you are, instead of letting them share their passion?  Or<br />
+have you approached your day, in the damp, cold morning, with the thought<br />
+“I’m going to learn so much about myself today!”</p>
+
+<p>When was the last time you’ve been curious?</p>
+
+        </p>
+
+        <span class="post-meta">Feb 20, 2016</span>
+      </li>
+    
+      <li>
+        <h2>
+          Courage
+        </h2>
+
+        <p>
+          <p>No one’s going to give you something you ain’t got the courage to get.</p>
+
+<p>Even if there’s someone who’s willing to do this, would you feel well by<br />
+knowing you can’t get anything from life by yourself?  Knowing you have to<br />
+depend on something external for your success to happen?  Yes, there are quite<br />
+many people who’s success is only based on luck.  But luck ain’t sustainable.<br />
+In the end, the chaos of life might get everything away from you and leave a<br />
+crumbling mess.  The chaos of life, however, can do the same with a person<br />
+who has realised their dreams with courage and dedication.  Humans feel<br />
+confident while they are around people with courage, though.  So, just for the<br />
+sake of not being alone, be courageous.</p>
+
+        </p>
+
+        <span class="post-meta">Feb 20, 2016</span>
+      </li>
+    
+      <li>
+        <h2>
+          Lack of creativity
+        </h2>
+
+        <p>
+          <p>A tired state of mind leads to creative emptyness.  You begin not to find the<br />
+words and images you need.  Your thoughts are clear but you can’t express and<br />
+use them properly.  You feed yourself with anger and anxiety and begin to<br />
+create an even worse state of mind.  This is the result of little sleep and<br />
+poor food.  A damaged body leads to a damaged mind.</p>
+
+<p>But isn’t your mind the source of damage to your body? All in all, your mind<br />
+decides whether you should eat and sleep properly.  And if it decides against<br />
+that, it damages your body.  It would sound beautiful to say – “A damaged <br />
+mind leads to a damaged body.” That doesn’t solve anything, though because <br />
+each and every organism aims at self destruction.  Self destruction is the<br />
+means by which evolution does progress.  If we accept this as truth, we are<br />
+left off with a simple choice – destroy ourselves either in bliss and <br />
+happiness or in sadness and anger.</p>
+
+        </p>
+
+        <span class="post-meta">Feb 16, 2016</span>
+      </li>
+    
+      <li>
+        <h2>
+          Opening up
+        </h2>
+
+        <p>
+          <p>Feeling low is an opportunity to hide.  You can either resist it or fight it.<br />
+I prefer accepting it and opening up.</p>
+
+<p>Opening up is all about configuring your body properly.  Instead of crossing<br />
+your arms and looking down, you open your solar plexus and lift your head up.<br />
+Instead of trying to suppress the feeling of emptyness, sadness and anger you<br />
+acknowledge them and listen.  You’ll either be relieved or continue to feel<br />
+low.  That doesn’t really matter.  What matters is mindfulness and action<br />
+aimed at not letting chance take what you want from life.</p>
+
+<p>It’s up to you, however – some people get lucky, others learn to shape their<br />
+lives in order to get what they need.</p>
+
+        </p>
+
+        <span class="post-meta">Feb 14, 2016</span>
+      </li>
+    
+      <li>
+        <h2>
+          Out of society
+        </h2>
+
+        <p>
+          <p>I’m used to talking with people who are in some way or another like me.  Today<br />
+I set on my journey to make some customer development about a company my mother<br />
+and I are going to start.  I went to an apiculture exhibition in Pleven.  It<br />
+was crowded, noisy and the people there were quite different from me.  Mainly,<br />
+they weren’t afraid of the crowd.  And I was overwhelmed by the crowd.  I <br />
+wanted to talk to customers, but I got a pack of hurying people before me.<br />
+Everyone was making deals, asking questions, buying things.  I didn’t see how<br />
+I could fit in this place.  I tried an approach or two and failed miserably.<br />
+In the end I got frustrated and nervous.  I was anxious to go home, to be in a<br />
+place where nobody is.  I did it eventually.</p>
+
+<p>Tomorrow I have another chance and I don’t plan to miss it.  I’ll go early,<br />
+while there ain’t much people and get a chance to talk to some of them.  I’m<br />
+also going to move in the crowd for about 4-5 tours of the place.  Just to get<br />
+used to it.  I may not even learn something new, but I’ll get some training in<br />
+being around people I’m not used to.  I may not love it, but I would sure<br />
+appreciate it.</p>
+
+        </p>
+
+        <span class="post-meta">Feb 13, 2016</span>
+      </li>
+    
+      <li>
+        <h2>
+          Generality
+        </h2>
+
+        <p>
+          <p>I express thoughts of higher concepts quite abstractly.  This might be due to<br />
+the impression that abstract and general sentences are more interesting and<br />
+hard to read.  If done right, this kind of thought expression makes the reader<br />
+think.  And only those who perservere in their understanding get rewarded with<br />
+a valuable insight of what’s the true meaning of the words that they had read.<br />
+Maybe these are the reasons why many philosphical texts are written this way.</p>
+
+<p>If you want to reach more people, however, you must be specific.  You must <br />
+provide practical and easy-to-test and relate-to examples.  Otherwise there’s<br />
+a high chance that most of your readers would back off.  The problem with<br />
+specificity is that examples represent only particular sides of your concept.<br />
+You gain popularity in the expense of true understanding.</p>
+
+<p>As with most solutions in life, you must consider the trade-offs.</p>
+
+        </p>
+
+        <span class="post-meta">Feb 11, 2016</span>
+      </li>
+    
+      <li>
+        <h2>
+          Managing time
+        </h2>
+
+        <p>
+          <p>Recently I found myself in many situations where I have much time on my hands<br />
+but don’t have any meaningful project on which to put it to good use.  I’m<br />
+partially solving this problem by learning and doing side-projects.  However<br />
+interesting these activities are, they don’t seem to bring me closer to my<br />
+purpose.  Actually, they do bring me closer to my purpose, the problem is that<br />
+they’re not impacting many people.</p>
+
+<p>I wonder what strategy should I employ in order to prevent such moments in the<br />
+future.  Or maybe I shouldn’t employ any strategy at all…  These time spans<br />
+may be for the better.  They may be useful for my body and mind to recharge<br />
+itself—to fill-in with energy, mindfulness and knowledge and be prepared for<br />
+the moment when I won’t have time even for the mere act of breathing.</p>
+
+        </p>
+
+        <span class="post-meta">Feb 10, 2016</span>
+      </li>
+    
+      <li>
+        <h2>
+          Expectations
+        </h2>
+
+        <p>
+          <p>As you start striving for success, you may start doing more experiments and it<br />
+may be necessary for you to escape out of your comfort zone on a regular basis.<br />
+While doing this you would do quite a lot of mistakes.  Also, people may <br />
+become more judgemental about you because they begin to have higher<br />
+expectations about you.  You may often feel bad, misguided.  You may often feel<br />
+like you’re useless.</p>
+
+<p>I think that’s quite normal.  While a mediocre person would be guarded by his<br />
+peers in order not to feel little and useless, a superior person would be <br />
+tested by everyone, everyday.  When people see that you are able, they want to<br />
+make sure this is true in every way they can.</p>
+
+<p>Appreciate these tests.  They may be a sign that you’re on your right path.</p>
+
+        </p>
+
+        <span class="post-meta">Feb 8, 2016</span>
+      </li>
+    
+      <li>
+        <h2>
+          Rejection
+        </h2>
+
+        <p>
+          <p>Getting rejected on a daily basis is a skill that should be acquired.<br />
+Rejection tickens your skin and teaches you about how you shouldn’t approach<br />
+problems.  Without it there won’t be corrective means with which to learn what<br />
+is accepted in our society.  If you don’t care about the society, you shouldn’t<br />
+care about being rejected.</p>
+
+<p>Rejection is not only related to being said “No” by some other human being.<br />
+Rejection is also about events which fail to meet your expectations.  Events<br />
+like going out and not being able to have a drink, listening to music and not<br />
+being able to think, working hard all day and not being able to fall asleep.</p>
+
+<p>Without being present you won’t be able to notice the moments of rejection in <br />
+your life.</p>
+
+<p>You stay in your zone of comfort because you are afraid to be rejected.  Some<br />
+people go out of their zone of comfort because they love to be rejected.  But<br />
+if you feel well about being out of your zone of comfort, what exactly does <br />
+this zone represent?</p>
+
+        </p>
+
+        <span class="post-meta">Feb 7, 2016</span>
+      </li>
+    
+      <li>
+        <h2>
           Listening and brushing my teeth
         </h2>
 
         <p>
-          <p>My flatmate is quite an awesome guy. During most of our evenings we talk about business, communication, technology and tough problems. Usually these conversations span through various activities -- I have dinner, brush my teeth, do some other stuff -- but we keep on talking because there's so much interesting stuff to discuss. Yesterday I noticed something wonderful. While brushing my teeth, we started talking about an interesting problem of his. The most valuable thing that happened was that I couldn't talk back. I really had to listen and do nothing more. I had to resist the temptation to give my opinion because otherwise I would spit toothpaste all over the place. I loved that.</p>
+          <p>My flatmate is quite an awesome guy. During most of our evenings we talk about business, communication, technology and tough problems. Usually these conversations span through various activities -- I have dinner, brush my teeth, do some other stuff -- but we keep on talking because there's so much interesting stuff to discuss. Yesterday I noticed something wonderful. While brushing my teeth, we started talking about an interesting problem of his. The most valuable thing that happened was that I couldn't talk back. I really had to listen and do nothing more. I had to resist the temptation to give my opinion because otherwise I would spit toothpaste all over the place.</p>
+
+<p>I loved that.</p>
 
         </p>
 

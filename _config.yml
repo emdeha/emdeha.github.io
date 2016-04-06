@@ -10,3 +10,7 @@ title: Tsvetan's Blog
 
 # Build settings
 markdown: kramdown
+
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
