@@ -14,6 +14,7 @@ In this post I'm going to show you some means to create infinite, immutable
 streams using Perl.
 
 Given the above requirements, our streams should:
+
 1. Provide a simple interface in order to create a stream from any type of object
 2. Be infinite
 3. Be immutable
