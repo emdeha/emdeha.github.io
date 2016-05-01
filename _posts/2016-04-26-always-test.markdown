@@ -13,7 +13,7 @@ state, I told everyone that all's good and continued with my daily schedule.
 But, you know, changing a not-so-well-designed service's location sometimes
 means that you have to migrate its database as well.  And if you don't do that
 correctly the simplest thing that could go wrong is to screw up the DB's access
-rights.  At voila, you get: `Access denied for user 'someone'@'localhost' 
+rights.  Et voila, you get: `Access denied for user 'someone'@'localhost' 
 (using password: YES)` as a response.  And what you expected was just a csv
 with some values...
 
