@@ -11,6 +11,7 @@ piece of work.  There are several reasons for this:
 2. The words I'm using don't deliver the perfect meaning;
 3. The way I've structured the text in my head doesn't fully express my 
 thoughts.
+
 <br>
 
 To remedy these problems, I created a simple but effective routine.  Whenever
