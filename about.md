@@ -8,4 +8,4 @@ I love reality.
 
 Drop me an email if you are curious about me.
 
-cpi.cecko on gmail.com
+tsvetan on camplight.net
