@@ -12,6 +12,7 @@ his work.  Sadly, due to the non-adaptiveness of the Soviet economy, he was
 killed.  The reason -- sabotaging Soviet economy by setting minimalist goals.
 
 His principles were simple:
+
 1. Seek out new ideas and try new things in small steps, often resulting in
 failure;
 2. Make each failure survivable;
