@@ -1,0 +1,54 @@
+---
+layout: post
+title: "Cycles of rest and dynamics"
+date: 2016-09-30
+---
+
+I wanted to achieve a lot during this week. I wanted to help
+[Camplight](https://camplight.net) grow as a business, I wanted to code, I
+wanted to buy a motorbike, I wanted to put to an end a project I'm long ago
+tired of, I wanted to continue learning AI, I wanted to be social. These are
+quite many tasks and to do them all, I got the spectacular idea to get up
+early and going to bed a bit late. It turned out that such an idea ain't so
+spectacular after all. On the third day of the week, I achieved some mistakes
+and some of the so-called burnout.
+
+I'm fortunate enough to be conscious of what happens to my body and mind. I'm
+not sure that fortune is the correct word, though, but let's presume we have
+control over nothing. This consciousness alerts me quite soon when something
+good or bad is deemed to happen. It has helped me quite many times to notice
+when I'm overstressed, overexited, indulged in meaningless dreams or just
+being plain unreal. It has helped me to be mindful of this week's happenings.
+Otherwise, I would've continued the unproductive, damaging, unhappy regime I
+had put myself into.
+
+The interesting thing about all this, is that it's not the first time I've put
+myself into such a regime. Actually, now I notice that I live in cycles of
+deep desire for work and stress, followed by want for rest and lazyness. It's
+an interesting pseudo-balance, in which I'm fortunate that the
+rest-and-lazyness parts don't occur for too long periods, otherwise I would
+achieve nothing.
+
+Given the fact that the following week begins my final year in university, I
+have to be more thoughtful about my rest and productivity. Doing many things
+and not putting Quality in any of them is not productivity. Sleeping less
+hours and having people pity you because you "work so hard" ain't
+productivity, it's just plain attention-whoring. Doing more without reflecting
+on the ways you do it rarely leads to prosperity and success (whatever these
+words' definition might be). Not being able to drop your opportunities leads
+you to a condition of no-direction, livingless being.
+
+So, I'd like to state a simple principle:
+
+> Opportunities always arise if you want them. What's important then, is not
+> blindly trying to catch each opportunity, but thoughtfully reject what seems
+> great, but won't really lead you to greatness in the long term.
+
+If I am to apply this principle, I should not go into too many elective
+courses in university, I should mainly concentrate of bringing value to
+Camplight by developing Quality software and improving my communication and
+engineering skills, and I should invest time in learning AI only when I really
+have the cognitive power of doing so. Everything else should wait, unless I
+really feel like I want to do it.
+
+That'd be an interesting experiment to try.
