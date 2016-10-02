@@ -35,6 +35,7 @@ This pattern is about actions you can take when learning a new technology in
 order to learn it faster and better.
 
 Such actions can be:
+
 1. Following blog streams
 2. Following masters in the technology on Twitter
 3. Actively reading and participating in a mailing list on the matter.
