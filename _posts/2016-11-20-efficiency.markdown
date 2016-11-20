@@ -6,6 +6,7 @@ date: 2016-11-20
 
 > There is nothing so useless as doing efficiently that which should not be
 > done at all.
+>
 > -- Peter Drucker
 
 I have an observation that there are many entities in our world--be it people,
