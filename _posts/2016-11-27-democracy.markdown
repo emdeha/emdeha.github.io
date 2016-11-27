@@ -28,10 +28,10 @@ Now, let's move away from the topic of contries and discuss companies
 A lot of corporations these days are run in a totalitarian, bureaucratic
 manner which leads to yielding high profit for some decades but in the end
 leaves an eternally dying monster which does nothing but continue getting the
-life out of the humans which comprise it. Yeah, many organizations, especially
+life out of the humans who comprise it. Yeah, many organizations, especially
 software companies, are trying to put more power in their employees by some
 HR tactics but they're doing it solely for the purpose of yielding more
-profits.  If employees didn't notice that it'd be great, but it's usually
+profits.  If employees didn't notice that, it'd be great, but it's usually
 either quite obvious or the people are just clever enough to figure out the
 delusion. And once someone understands that they are being tricked, they no
 longer trust you and want to help you.
