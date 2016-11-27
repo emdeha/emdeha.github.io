@@ -45,8 +45,8 @@ managers. Profits skyrocketed, people were happy and the company actually
 provided the goods for which it was created, and didn't aim mindlessly at an
 ever exceeding profit.
 
-In the three decades since then, some more democratic companies arised. They
-are few and under the radar. From personal experience, I can talk about
+In the three decades since then, more democratic companies arised. They are
+few and under the radar. From personal experience, I can talk about
 [Camplight](https://camplight.net) because I've been working with the awesome
 people there for about 7 months now. It's tough, it requires you to be
 responsible and proactive, it requires you to think and be mindful, it values
@@ -57,9 +57,9 @@ come out of nowhere and you just accept them. Camplight is yet another
 incarnation of democracy in capitalistic companies.
 
 But the purpose of this post ain't the marketing of flat companies (or Teal,
-Holocratic, or whatever-you-name-them). The purpose of this post is just to
-propose an idea about how we can fix our democracy and let it flourish and
-enliven all the beings in our society.
+Holocratic, or whatever-you-name-them). The purpose of this post is to propose
+an idea about how we can fix our democracy and let it flourish and enliven all
+the beings in our society.
 
 I think Capitalism is great--it's the single system I've found to actually
 motivate people to develop and be happy. The way we've implemented it is
