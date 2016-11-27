@@ -11,11 +11,11 @@ From my experience, there are two issues with democratic countries:
 votes
 
 The first is obvious, in Bulgaria only around 50% of the population voted
-during the last presidential elections. In the USA the number was even
-less--50 out of 300 million people voted during the Trump vs. Clinton race.
-People who protect the view that less educated people should have less
-electorial power, put the argument that a person who doesn't have the
-intellectual development required to understand what to vote for can
+during the last presidential elections. In the USA the number was higher--134
+out of 231 million people eligible for voting voted during the Trump vs.
+Clinton race. People who protect the view that less educated people should
+have less electorial power, put the argument that a person who doesn't have
+the intellectual development required to understand what to vote for can
 contribute to a bad voting decision. Given that there are still many
 uneducated and poor people in democratic countries, this could lead to
 something less optimal for the country. Of course, making some people more
