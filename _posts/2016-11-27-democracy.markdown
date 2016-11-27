@@ -53,7 +53,7 @@ responsible and proactive, it requires you to think and be mindful, it values
 happiness, friendship and being healthy, it requires you to vote. Profit and
 exponential growth aren't our aim (they get somehow useless by the time you're
 dead). The cool thing is, when you don't aim towards these two things, they
-come out of nowhere and you just accept them. Campight is yet another
+come out of nowhere and you just accept them. Camplight is yet another
 incarnation of democracy in capitalistic companies.
 
 But the purpose of this post ain't the marketing of flat companies (or Teal,
