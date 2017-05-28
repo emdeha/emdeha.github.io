@@ -207,7 +207,6 @@
     font-size: 26px;
     letter-spacing: -1px;
     line-height: 1;
-    color: $grey-color-dark;
 
     @include media-query($on-laptop) {
         font-size: 36px;
