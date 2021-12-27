@@ -26,11 +26,12 @@ reposiory_name: tsvetanov.me
 
 # Build settings
 theme: jekyll-theme-minimal
-page_excerpts: true
 plugins:
   - jekyll-feed
   - jekyll-paginate
 paginate: 5
+
+excerpt_separator: <!--more-->
 
 # Exclude from processing.
 # The following items will not be processed, by default.
