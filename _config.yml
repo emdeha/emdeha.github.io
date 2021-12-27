@@ -22,6 +22,7 @@ title: Tsvetan's Engineering Blog
 description: >- # this means to ignore newlines until "baseurl:"
   My engineering blog.
 github_username: emdeha
+reposiory_name: tsvetanov.me
 
 # Build settings
 theme: jekyll-theme-minimal
