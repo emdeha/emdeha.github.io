@@ -2,11 +2,26 @@
 layout: default
 ---
 
-<div>
-  {% for post in site.posts %}
-    <small>{{ post.date | date: "%-d %B %Y" }}</small>
-    <h1><a href="{{ post.url }}">{{ post.title }}</a></h1>
-    {{ post.excerpt }}
-    <hr />
-  {% endfor %}
+<!-- This loops through the paginated posts -->
+{% for post in paginator.posts %}
+  <small>{{ post.date | date: "%-d %B %Y" }}</small>
+  <h1><a href="{{ post.url }}">{{ post.title }}</a></h1>
+  {{ post.excerpt }}
+{% endfor %}
+
+<!-- Pagination links -->
+<div class="pagination">
+  {% if paginator.previous_page %}
+    <a href="{{ paginator.previous_page_path }}" class="previous">
+      Previous
+    </a>
+  {% endif %}
+  <span class="page_number ">
+    Page: {{ paginator.page }} of {{ paginator.total_pages }}
+  </span>
+  {% if paginator.next_page %}
+    <a href="{{ paginator.next_page_path }}" class="next">Next</a>
+  {% else %}
+    <span class="next ">Next</span>
+  {% endif %}
 </div>
