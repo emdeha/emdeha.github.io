@@ -8,6 +8,8 @@ The following post describes an organization that is evolving and has reached th
 
 An Agile Architecture Review Board is a cross-functional and cross-team group.  With its diverse technical and domain background it aims at putting a set of architectural principles and practices that should scale the organization. The following sections describe the Purpose, Structure and Processes that should guide this Board.
 
+<!--more-->
+
 ## Purpose
 
 The Agile Architecture Review Board should have the responsibility for:
