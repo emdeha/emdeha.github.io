@@ -13,6 +13,10 @@ and not let them drain.
 In this post I'm going to show you some means to create infinite, immutable
 streams using Perl.
 
+<!--more-->
+
+---
+
 Given the above requirements, our streams should:
 
 1. Provide a simple interface in order to create a stream from any type of object
