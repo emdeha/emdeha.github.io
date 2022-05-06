@@ -25,7 +25,7 @@ The Agile Architecture Review Board should be a **part-time** job for a group of
 1. **Leadership**. To help the Board work towards a common vision;
 2. **Management**. To help the Board organize itself in the best way possible;
 3. **Technical Expertise**. To help the Board have proper technical guidance;
-4. **Popularity at Via**. To help organization members see that the board consists of people they admire.
+4. **Popularity the Organization**. To help organization members see that the board consists of people they admire.
 
 Appropriate positions include: Senior Executives, Directors, TLs, Product Managers, Senior Engineers.
 
