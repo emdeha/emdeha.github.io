@@ -46,7 +46,7 @@ Several services that change in unison. That's the key. What if all these servic
 
 ## Redesign according to subdomains
 
-Things that change in unison tend to belong to the same business [subdomain](https://microservices.io/patterns/decomposition/decompose-by-subdomain.html). However, what does a business subdomain represent? There's a well known concept in Domain Driver Design (DDD). This is the concept of a **domain**. A domain is the application's problem space - the business. An example problem space might be "getting a parcel from point A to point B". However, domains are usually too big and general. That necessitates splitting them into subdomains. Subdomains are parts of the business that contribute to the whole of the business when they interact between each other.
+Things that change in unison tend to belong to the same business [subdomain](https://microservices.io/patterns/decomposition/decompose-by-subdomain.html). However, what does a business subdomain represent? There's a well known concept in Domain Driven Design (DDD). This is the concept of a **domain**. A domain is the application's problem space - the business. An example problem space might be "getting a parcel from point A to point B". However, domains are usually too big and general. That necessitates splitting them into subdomains. Subdomains are parts of the business that contribute to the whole of the business when they interact between each other.
 
 Given the above example problem space, there can be several subdomains for it:
 
