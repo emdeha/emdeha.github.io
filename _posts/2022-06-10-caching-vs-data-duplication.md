@@ -14,7 +14,7 @@ The current architecture makes synchronous calls to the CRM to retrieve the work
 
 In this article I’m going to explore several solutions to the problem with the theory behind them and why they are a good choice or not in this specific context.
 
-<!-- more -->
+<!--more-->
 
 ## Possible Solutions
 
