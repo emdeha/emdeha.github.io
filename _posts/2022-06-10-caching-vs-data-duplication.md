@@ -4,6 +4,10 @@ title: "Caching vs. data duplication"
 date: 2022-06-10
 ---
 
+In this article I’m going to explore several solutions to the problem of latency in distributed systems.
+
+<!--more-->
+
 We have the following distributed system.
 
 ![System architecture](/assets/images/2022-06-10-distributed-system.png)
@@ -11,10 +15,6 @@ We have the following distributed system.
 In it, the Availability Management service needs to be aware of the worker’s status. It retrieves it from the CRM. The Availability Management service and the CRM service are under different teams.
 
 The current architecture makes synchronous calls to the CRM to retrieve the worker’s status whenever it’s needed. However, the Availability Management team has started to experience latency issues with this approach.
-
-In this article I’m going to explore several solutions to the problem with the theory behind them and why they are a good choice or not in this specific context.
-
-<!--more-->
 
 ## Possible Solutions
 

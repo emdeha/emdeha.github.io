@@ -10,10 +10,10 @@ by byte until we take all we need.  We could boost them though by providing
 ways of making streams out of random objects, merging and transforming them,
 and not let them drain.
 
+<!--more-->
+
 In this post I'm going to show you some means to create infinite, immutable
 streams using Perl.
-
-<!--more-->
 
 ---
 

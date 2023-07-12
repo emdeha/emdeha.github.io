@@ -6,9 +6,9 @@ date: 2022-02-03
 
 Several months ago I was faced with a crisis. I wanted to do and track so much stuff that I started to get lost in it. I had a text file on my computer for my [manager journal](https://blog.rstankov.com/my-manager-journal/). I had fleeting documents for architecture proposals in Google Drive. I had my career focus stuck in my head. I had loads of bookmarks and books I wanted to read but without any clear direction. Being quite organized in other areas of my life, this started to bug me a lot. So, I had to find a solution.
 
-I’ve heard about Notion before, but it wasn’t until I read [this article](https://reasonabledeviations.com/2021/09/18/how-i-use-notion/) that I decided to try it out to organize my work. Now, I’m going to explain how I did that and what did it lead to.
-
 <!--more-->
+
+I’ve heard about Notion before, but it wasn’t until I read [this article](https://reasonabledeviations.com/2021/09/18/how-i-use-notion/) that I decided to try it out to organize my work. Now, I’m going to explain how I did that and what did it lead to.
 
 ## Evolutionary Process
 

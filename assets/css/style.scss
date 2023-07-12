@@ -4,11 +4,27 @@
 @import "{{ site.theme }}";
 
 body {
-  font-size: 16px
+  font-size: 16px;
 }
 
-.mb-10 {
-  margin-bottom: 10px
+div.wrapper {
+  width: 1200px
+}
+
+div.wrapper header {
+  width: 300px
+}
+
+div.wrapper section {
+  width: 800px
+}
+
+.mb-1 {
+  margin-bottom: 1rem
+}
+
+.mt-1 {
+  margin-top: 1rem
 }
 
 .center {
@@ -21,4 +37,37 @@ body {
 
 .bold {
   font-weight: bold;
+}
+
+.card {
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0,0,0,.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 20px;
+}
+
+@media print, screen and (max-width: 960px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  div.wrapper {
+    width: auto;
+    margin: 0;
+  }
+
+  div.wrapper header {
+    width: auto;
+  }
+
+  div.wrapper section {
+    width: auto;
+  }
 }
