@@ -45,7 +45,7 @@ collections:
     output: true
     show: true
     outline: A collection on Theravada. Translations, thoughts and others.
-    url: /theravada.html
+    url: /theravada/index.html
     status: seedling
 
 # Exclude from processing.

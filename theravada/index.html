@@ -1,0 +1,14 @@
+---
+layout: default
+---
+
+{% assign collection = site.collections | where: "label", "theravada" %}
+
+<h1>С всеки дъх</h1>
+<h2>Съдържание</h2>
+
+<ol>
+{% for doc in collection[0].docs %}
+    <li><a href="{{doc.url}}">{{doc.title}}</a></li>
+{% endfor %}
+</ol>
