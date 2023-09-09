@@ -4,11 +4,16 @@ layout: default
 
 {% assign collection = site.collections | where: "label", "theravada" %}
 
-<h1>С всеки дъх</h1>
-<h2>Съдържание</h2>
+<div class="accordion">
+    <input type="checkbox" id="chk1">
+    <label for="chk1">С всеки дъх</label>
+    <div class="content">
+        <h2>Съдържание</h2>
 
-<ol>
-{% for doc in collection[0].docs %}
-    <li><a href="{{doc.url}}">{{doc.title}}</a></li>
-{% endfor %}
-</ol>
+        <ol>
+        {% for doc in collection[0].docs %}
+            <li><a href="{{doc.url}}">{{doc.title}}</a></li>
+        {% endfor %}
+        </ol>
+    </div>
+</div>

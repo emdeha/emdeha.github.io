@@ -43,7 +43,7 @@ div.wrapper section {
   text-transform: capitalize;
 }
 
-.card {
+@mixin card {
   background-color: #fff;
   border-radius: 4px;
   box-shadow: 0 0 10px rgba(0,0,0,.1);
@@ -51,10 +51,66 @@ div.wrapper section {
   margin-bottom: 20px;
 }
 
+.card {
+  @include card;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-gap: 20px;
+}
+
+.accordion {
+  @include card;
+
+  padding: 0;
+  overflow: hidden;
+
+  input {
+    position: absolute;
+    opacity: 0;
+    z-index: -1;
+
+    &:checked {
+      ~ .content {
+        max-height: 100vh;
+        padding: 20px;
+      }
+
+      ~ label {
+        &::after {
+          transform: rotate(90deg);
+        }
+      }
+    }
+  }
+
+  label {
+    display: flex;
+    justify-content: space-between;
+    padding: 1em;
+    font-size: 1.5em;
+    cursor: pointer;
+
+    &:hover {
+      background: darken(#fff, 10%);
+    }
+
+    &::after {
+      content: "\276F";
+      width: 1.5em;
+      height: 1.5em;
+      text-align: center;
+      transition: all .35s;
+    }
+  }
+
+  .content {
+    max-height: 0;
+    transition: all 1s;
+    padding: 0 20px;
+  }
 }
 
 @media print, screen and (max-width: 960px) {
