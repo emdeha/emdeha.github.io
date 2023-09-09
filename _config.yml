@@ -34,6 +34,20 @@ excerpt_separator: <!--more-->
 
 repository: emdeha/emdeha.github.io.git
 
+collections:
+  engineering:
+    output: true
+    show: true
+    outline: A collection of engineering posts.
+    url: /engineering.html
+    status: seedling
+  theravada:
+    output: true
+    show: true
+    outline: A collection on Theravada. Translations, thoughts and others.
+    url: /theravada.html
+    status: seedling
+
 # Exclude from processing.
 # The following items will not be processed, by default.
 # Any item listed under the `exclude:` key here will be automatically added to

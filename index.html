@@ -2,7 +2,8 @@
 layout: default
 ---
 
-<!-- This loops through the paginated posts -->
+<h1>Posts</h1>
+
 <div class="grid">
   {% for post in site.posts %}
   <div class="card">
@@ -12,5 +13,25 @@ layout: default
       {{ post.excerpt }}
     </div>
   </div>
+  {% endfor %}
+</div>
+
+<h1>Collections</h1>
+
+<div class="grid">
+  {% for collection in site.collections %}
+  {% if collection.show %}
+    <div class="card">
+      <a href="{{ collection.url }}" class="capitalize">{{ collection.label }}</a>
+
+      <div class="mt-1">
+        status: {{ collection.status }}
+      </div>
+
+      <div class="mt-1">
+        {{ collection.outline }}
+      </div>
+    </div>
+  {% endif %}
   {% endfor %}
 </div>
