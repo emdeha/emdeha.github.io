@@ -47,6 +47,12 @@ collections:
     outline: A collection on Theravada. Translations, thoughts and others.
     url: /theravada/index.html
     status: seedling
+  travel:
+    output: true
+    show: true
+    outline: Пътеписи
+    url: /travel.html
+    status: seedling
 
 # Exclude from processing.
 # The following items will not be processed, by default.
